@@ -1,15 +1,11 @@
----
-title: "Reproducible Research: Peer Assessment 1"
-output: 
-  html_document:
-    keep_md: true
----
+# Reproducible Research: Peer Assessment 1
 
 
 ## Loading and preprocessing the data
 ###Import Data
 
-```{r}
+
+```r
 rawdata<-read.csv("activity/activity.csv")
 
 #New data set with NA's removed
@@ -21,22 +17,43 @@ rawdataNoNA<-rawdata[filterNA,]
 ## What is mean total number of steps taken per day?
 ###Histogram of total number of steps taken each day (NA's removed)
 I use the **sqldf** package for aggregating data!
-```{r}
+
+```r
 library("sqldf")
+```
+
+```
+## Loading required package: gsubfn
+## Loading required package: proto
+## Loading required package: RSQLite
+## Loading required package: DBI
+```
+
+```r
 aggdata<-sqldf("SELECT date, sum(steps) AS totalsteps 
                 FROM rawdataNoNA 
                 GROUP BY date
                 ORDER BY date")
+```
+
+```
+## Loading required package: tcltk
+```
+
+```r
 hist(aggdata$totalsteps, main = "Histogram of Total Steps", xlab = "Total Steps Per Day")
-````
+```
+
+![](PA1_template_files/figure-html/unnamed-chunk-2-1.png) 
 
 ###The mean and median of steps taken per day
-```{r, echo= FALSE} 
 
-paste("The mean is ",mean(aggdata$totalsteps),sep ="")
+```
+## [1] "The mean is 10766.1886792453"
+```
 
-paste("The median is ",median(aggdata$totalsteps),sep="")
-
+```
+## [1] "The median is 10765"
 ```
 
 
@@ -44,22 +61,7 @@ paste("The median is ",median(aggdata$totalsteps),sep="")
 ###Time Series Plot of steps averaged across days
 First I calcuated the averages, then made the graph below using ggplot2.
 
-```{r, echo=FALSE}
-library(ggplot2)
-aggdata2<-sqldf("SELECT interval, avg(steps) AS avgsteps 
-                FROM rawdata 
-                GROUP BY interval
-                 ORDER BY interval ")
-
-max<-sqldf("select interval, avgsteps
-           FROM aggdata2
-           ORDER BY avgsteps desc
-           LIMIT 1")
-
-#line graph
-ggplot(aggdata2, aes(x = interval, y = avgsteps)) +geom_line() +geom_point(data = max)+geom_text(data = max, aes(label=avgsteps))
-
-```
+![](PA1_template_files/figure-html/unnamed-chunk-4-1.png) 
 
 The interval that contains the max average steps is 835.
 
@@ -67,14 +69,15 @@ The interval that contains the max average steps is 835.
 ## Imputing missing values
 The number of NA's is 
 
-```{r, echo = FALSE}
-dim(rawdata)[1]-dim(rawdataNoNA)[1]
+
+```
+## [1] 2304
 ```
 
 I will use the mean for the 5-minute intervals to replace the NA's. Below is the code. The dataset cleanupNA will all the NA's replaced with the mean value of the corresponding interval
 
-```{r}
 
+```r
 #Use Mean's to replace NA's
 cleanupNA<-merge(rawdata,aggdata2, by="interval")
 
@@ -89,26 +92,18 @@ for (i in 1:loopend) {
 
 
 cleanupNA<-sqldf("SELECT * FROM cleanupNA ORDER BY date, interval, steps")
-
 ```
 
 Below is the new histogram
 
-```{r, echo = FALSE}
-#new total steps per day
-cleanupNAaggdata<-sqldf("SELECT date, sum(steps) AS totalsteps 
-                FROM cleanupNA 
-                GROUP BY date
-               ORDER BY date")
+![](PA1_template_files/figure-html/unnamed-chunk-7-1.png) 
 
-#histogram of new data set
-hist(cleanupNAaggdata$totalsteps, main = "Histogram of Total Steps", xlab = "Total Steps Per Day")
+```
+## [1] "The new mean is 10766.1886792453"
+```
 
-
-paste("The new mean is ",mean(cleanupNAaggdata$totalsteps),sep ="")
-
-paste("The new median is ",median(cleanupNAaggdata$totalsteps),sep="")
-
+```
+## [1] "The new median is 10766.1886792453"
 ```
 After replacing the NA's with the mean of their respective interval, we see the median and the mean are equivalent now.
 
@@ -116,7 +111,8 @@ After replacing the NA's with the mean of their respective interval, we see the 
 
 ###Weekdays vs. Weekends patterns
 The factor variable has value **1** for **weekend** and **2** for **weekday**
-```{r}
+
+```r
 #add weekday factor
 i <- 1
 loopend<- dim(cleanupNA)[1]
@@ -132,20 +128,9 @@ for (i in 1:loopend){
 }
 
 cleanupNA$factor <- as.factor(cleanupNA$factor)
-
 ```
 
 Below is the graph of the average steps factored across weekdays or weekends
 
-```{r, echo = FALSE}
-
-cleanupNAaggdata2<-sqldf("SELECT factor, interval, avg(steps) AS avgsteps 
-                FROM cleanupNA 
-                GROUP BY factor,interval
-                ORDER BY factor, interval")
-
-#plot line graphs
-ggplot(cleanupNAaggdata2, aes(x = interval, y = avgsteps)) +geom_line(aes(color = factor)) +facet_grid(factor~.)
-
-```
+![](PA1_template_files/figure-html/unnamed-chunk-9-1.png) 
 
