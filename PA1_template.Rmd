@@ -149,3 +149,5 @@ ggplot(cleanupNAaggdata2, aes(x = interval, y = avgsteps)) +geom_line(aes(color 
 
 ```
 
+Based on the plots, it looks like the number of stephs in the earlier part of the day are much higher for weekdays and as they day progresses, they taper off.
+For weekends however, they number of steps are a bit lower initially, however they stay consistent throughout the majority of the day.

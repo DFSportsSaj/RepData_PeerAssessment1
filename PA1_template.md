@@ -134,3 +134,5 @@ Below is the graph of the average steps factored across weekdays or weekends
 
 ![](PA1_template_files/figure-html/unnamed-chunk-9-1.png) 
 
+Based on the plots, it looks like the number of stephs in the earlier part of the day are much higher for weekdays and as they day progresses, they taper off.
+For weekends however, they number of steps are a bit lower initially, however they stay consistent throughout the majority of the day.
